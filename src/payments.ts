@@ -72,7 +72,11 @@ export interface RouteSpec {
   price: string;
   /** Shown to the payer in the wallet / modal. */
   description: string;
-  /** Optional JSON-schema-ish hint for what the 200 returns. */
+  /**
+   * x402 Bazaar `outputSchema` for the route: `{ input, output }` — how to call
+   * it and what the 200 body looks like. Supplied from `src/schemas.ts`, which
+   * is generated from `openapi.json` so runtime and spec cannot drift.
+   */
   outputSchema?: Record<string, unknown>;
 }
 

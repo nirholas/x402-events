@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>x402-events — Event search and on-sale checks over Ticketmaster Discovery — agents find real events and ticket windows</title>
+<meta name="description" content="Event search and on-sale checks over Ticketmaster Discovery — agents find real events and ticket windows Pay per call over HTTP 402 (x402) in USDC on Base or Solana — no account, no API key.">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/favicon.svg">
+<link rel="canonical" href="https://nirholas.github.io/x402-events/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="x402-events">
+<meta property="og:title" content="x402-events">
+<meta property="og:description" content="Event search and on-sale checks over Ticketmaster Discovery — agents find real events and ticket windows Pay per call over HTTP 402 (x402) in USDC on Base or Solana.">
+<meta property="og:image" content="/og.svg">
+<meta property="og:url" content="https://nirholas.github.io/x402-events/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="x402-events">
+<meta name="twitter:description" content="Event search and on-sale checks over Ticketmaster Discovery — agents find real events and ticket windows">
+<meta name="twitter:image" content="/og.svg">
+<style>
+  :root { --bg:#0b0d12; --fg:#e7ebf0; --muted:#98a2b3; --line:#1e232d; --accent:#a78bfa; }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:3rem 1.25rem 4rem; background:var(--bg); color:var(--fg);
+         font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  main { max-width:52rem; margin:0 auto; }
+  h1 { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:2rem; margin:0 0 .5rem; }
+  h2 { font-size:1.05rem; text-transform:uppercase; letter-spacing:.08em; color:var(--muted);
+        margin:2.5rem 0 .75rem; font-weight:600; }
+  p.lead { color:var(--muted); font-size:1.1rem; margin:0 0 1.5rem; }
+  a { color:var(--accent); }
+  code { font-family:ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.9em; }
+  pre { background:#11141b; border:1px solid var(--line); border-radius:10px; padding:1rem;
+         overflow-x:auto; font-size:.85rem; }
+  table { width:100%; border-collapse:collapse; font-size:.9rem; }
+  td, th { text-align:left; padding:.5rem .6rem; border-bottom:1px solid var(--line); vertical-align:top; }
+  td.paid { color:var(--accent); white-space:nowrap; }
+  td.free { color:var(--muted); white-space:nowrap; }
+  .badge { display:inline-block; border:1px solid var(--line); border-radius:999px;
+            padding:.15rem .6rem; font-size:.78rem; color:var(--muted); margin-right:.4rem; }
+  footer { margin-top:3rem; color:var(--muted); font-size:.85rem; }
+  @media (prefers-color-scheme: light) {
+    :root { --bg:#ffffff; --fg:#14181f; --muted:#5b6472; --line:#e5e8ee; }
+    pre { background:#f7f8fa; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>x402-events</h1>
+  <p class="lead">Event search and on-sale checks over Ticketmaster Discovery — agents find real events and ticket windows</p>
+  <p>
+    <span class="badge">HTTP 402 · x402 v1</span>
+    <span class="badge">USDC on Base or Solana</span>
+    <span class="badge">no API key</span>
+  </p>
+
+  <h2>Routes</h2>
+  <table>
+    <thead><tr><th>Method</th><th>Path</th><th>Price</th><th>Returns</th></tr></thead>
+    <tbody>
+        <tr><td><code>GET</code></td><td><code>/search</code></td><td class="paid">$0.003</td><td>Search real events by keyword, city, country and start date</td></tr>
+        <tr><td><code>GET</code></td><td><code>/onsale-check/{eventId}</code></td><td class="paid">$0.002</td><td>Current on-sale snapshot for one event, plus a delta against your cursor</td></tr>
+        <tr><td><code>GET</code></td><td><code>/</code></td><td class="free">free</td><td>Service metadata, live prices, and active payment rails</td></tr>
+        <tr><td><code>GET</code></td><td><code>/health</code></td><td class="free">free</td><td>Liveness probe</td></tr>
+        <tr><td><code>GET</code></td><td><code>/.well-known/x402</code></td><td class="free">free</td><td>x402 discovery manifest</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Call it</h2>
+  <pre><code>npm i x402-fetch viem
+
+import { wrapFetchWithPayment } from "x402-fetch";
+import { privateKeyToAccount } from "viem/accounts";
+
+const fetchWithPay = wrapFetchWithPayment(
+  fetch,
+  privateKeyToAccount(process.env.PRIVATE_KEY)
+);
+const res = await fetchWithPay("http://localhost:4023/search");
+console.log(await res.json());</code></pre>
+  <p class="lead">An unpaid request answers <code>402</code> with the accepted rails; retry with the
+  <code>X-PAYMENT</code> header and the artifact comes back in the body of that same request.</p>
+
+  <h2>Machine-readable</h2>
+  <ul>
+    <li><a href="/openapi.json">/openapi.json</a> — OpenAPI 3.1 description</li>
+    <li><a href="/.well-known/x402">/.well-known/x402</a> — x402 discovery manifest</li>
+    <li><a href="/health">/health</a> — liveness probe</li>
+  </ul>
+
+  <footer>
+    <a href="https://nirholas.github.io/x402-events/">Docs</a> ·
+    <a href="https://github.com/nirholas/x402-events">Source</a> ·
+    Apache-2.0
+  </footer>
+</main>
+</body>
+</html>

@@ -57,6 +57,28 @@ returns 402 with an `accepts` array containing one entry per rail:
 }
 ```
 
+**Protocol version.** This service speaks **x402 v1** — that is what the
+`x402Version: 1` above means, and it is what every shipped client
+(`x402-fetch`, `x402-axios`, the MCP wrapper) expects. x402 **v2** changes the
+challenge shape (payment requirements move under `extensions.bazaar.schema` and
+networks become CAIP-2 identifiers such as `eip155:8453`), so adopting it would
+break those clients. v2 is a planned future upgrade for agentcash
+compatibility; until then, read the challenge as v1.
+
+**Route schemas.** Every `accepts[]` entry carries an `outputSchema` with two
+halves, following the x402 Bazaar convention:
+
+```jsonc
+"outputSchema": {
+  "input":  { "type": "http", "method": "GET", "queryParams": { /* … */ } },
+  "output": { /* JSON-Schema of the 200 body */ }
+}
+```
+
+`input` tells you how to call the route, `output` tells you what comes back.
+Both are generated from `openapi.json`, so the runtime challenge and the
+published spec never disagree.
+
 **EVM path.** Sign an EIP-3009 `transferWithAuthorization`. Entirely
 client-side; no gas from the payer. `x402-fetch` does it in two lines:
 
