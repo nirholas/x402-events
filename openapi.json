@@ -1,0 +1,913 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "x402-events",
+    "version": "0.1.0",
+    "description": "Event search and on-sale checks over Ticketmaster Discovery — agents find real events and ticket windows\n\nEvery paid route returns the purchased artifact in the 200 response body. Pay in USDC on Base or Solana — your client picks the rail.",
+    "license": {
+      "name": "Apache-2.0",
+      "identifier": "Apache-2.0"
+    },
+    "contact": {
+      "name": "nirholas",
+      "email": "nichxbt@gmail.com",
+      "url": "https://github.com/nirholas/x402-events"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:4023",
+      "description": "Local development"
+    },
+    {
+      "url": "{baseUrl}",
+      "description": "Deployed instance",
+      "variables": {
+        "baseUrl": {
+          "default": "http://localhost:4023"
+        }
+      }
+    }
+  ],
+  "externalDocs": {
+    "description": "Docs site",
+    "url": "https://nirholas.github.io/x402-events/"
+  },
+  "tags": [
+    {
+      "name": "paid",
+      "description": "x402-paid routes. Artifact returned in the 200 body."
+    },
+    {
+      "name": "free",
+      "description": "Unpaid metadata routes."
+    }
+  ],
+  "paths": {
+    "/search": {
+      "get": {
+        "operationId": "searchEvents",
+        "summary": "Search real events by keyword, city, country and start date ($0.003)",
+        "description": "Search real events by keyword, city, country and start date\n\nPaid route — $0.003 in USDC. Pay on Base (EVM) or Solana; the 402 challenge lists both rails.",
+        "tags": [
+          "paid"
+        ],
+        "parameters": [
+          {
+            "name": "keyword",
+            "in": "query",
+            "required": false,
+            "description": "Free-text search across event, attraction and venue names.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "jazz"
+          },
+          {
+            "name": "city",
+            "in": "query",
+            "required": false,
+            "description": "City name, e.g. `Chicago`.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "Chicago"
+          },
+          {
+            "name": "countryCode",
+            "in": "query",
+            "required": false,
+            "description": "Two-letter ISO country code, e.g. `US`, `GB`.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "US"
+          },
+          {
+            "name": "startDateTime",
+            "in": "query",
+            "required": false,
+            "description": "Only events starting at or after this UTC instant, `YYYY-MM-DDTHH:MM:SSZ`.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "2026-09-01T00:00:00Z"
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "required": false,
+            "description": "Maximum results, 1…50. Default 10.",
+            "schema": {
+              "type": "integer"
+            },
+            "example": 2
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Events with venue, local and UTC start times, status, genre, price ranges and a ticket link",
+            "headers": {
+              "X-PAYMENT-RESPONSE": {
+                "description": "Base64 JSON settlement receipt.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "source",
+                    "query",
+                    "count",
+                    "events",
+                    "retrievedAt"
+                  ],
+                  "properties": {
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "ticketmaster",
+                        "fixture"
+                      ]
+                    },
+                    "query": {
+                      "type": "object",
+                      "properties": {
+                        "keyword": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "city": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "countryCode": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "startDateTime": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "size": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "count": {
+                      "type": "integer"
+                    },
+                    "retrievedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "events": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Event"
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "source": "fixture",
+                  "query": {
+                    "keyword": "jazz",
+                    "city": "Chicago",
+                    "countryCode": "US",
+                    "startDateTime": null,
+                    "size": 2
+                  },
+                  "count": 2,
+                  "events": [
+                    {
+                      "id": "FIX1RW2TPK1",
+                      "name": "Nova Quartet — Seattle",
+                      "url": "https://example.com/event/FIX1RW2TPK1",
+                      "startLocal": "2026-12-29T20:00:00",
+                      "startUtc": "2026-12-29T20:00:00.000Z",
+                      "timezone": "America/Chicago",
+                      "status": "onsale",
+                      "segment": "Music",
+                      "genre": "Classical",
+                      "venue": {
+                        "name": "Northgate Hall",
+                        "city": "Seattle",
+                        "state": "Washington",
+                        "country": "United States Of America",
+                        "address": "305 Harrison St",
+                        "latitude": 47.6216,
+                        "longitude": -122.3517
+                      },
+                      "priceRanges": [
+                        {
+                          "type": "standard",
+                          "currency": "USD",
+                          "min": 45,
+                          "max": 217
+                        }
+                      ],
+                      "images": [
+                        "https://example.com/img/FIX1RW2TPK1.jpg"
+                      ]
+                    },
+                    {
+                      "id": "FIX1RW2TPK2",
+                      "name": "Harbour Jazz Nights — Chicago",
+                      "url": "https://example.com/event/FIX1RW2TPK2",
+                      "startLocal": "2026-09-29T20:00:00",
+                      "startUtc": "2026-09-29T20:00:00.000Z",
+                      "timezone": "America/Chicago",
+                      "status": "onsale",
+                      "segment": "Music",
+                      "genre": "Jazz",
+                      "venue": {
+                        "name": "Riverside Arena",
+                        "city": "Chicago",
+                        "state": "Illinois",
+                        "country": "United States Of America",
+                        "address": "1901 W Madison St",
+                        "latitude": 41.8807,
+                        "longitude": -87.6742
+                      },
+                      "priceRanges": [
+                        {
+                          "type": "standard",
+                          "currency": "USD",
+                          "min": 45,
+                          "max": 245
+                        }
+                      ],
+                      "images": [
+                        "https://example.com/img/FIX1RW2TPK2.jpg"
+                      ]
+                    }
+                  ],
+                  "retrievedAt": "2026-08-07T02:50:56.083Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required (or payment rejected). The body lists both accepted rails.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequired"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream data source failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/onsale-check/{eventId}": {
+      "get": {
+        "operationId": "onSaleCheck",
+        "summary": "Current on-sale snapshot for one event, plus a delta against your cursor ($0.002)",
+        "description": "Current on-sale snapshot for one event, plus a delta against your cursor\n\nPaid route — $0.002 in USDC. Pay on Base (EVM) or Solana; the 402 challenge lists both rails.",
+        "tags": [
+          "paid"
+        ],
+        "parameters": [
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "description": "Event id as returned by `/search` (a Ticketmaster id, or a `FIX…` id in fixture mode).",
+            "schema": {
+              "type": "string"
+            },
+            "example": "FIX1RW2TPK1"
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "required": false,
+            "description": "The `snapshot.cursor` from a previous call. Supplying it populates `delta`.",
+            "schema": {
+              "type": "string"
+            },
+            "example": "eyJzIjoib25zYWxlIn0"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A complete on-sale snapshot — state, public and presale windows, price ranges, ticket link, and a fresh cursor — plus the field-by-field delta since the cursor you sent",
+            "headers": {
+              "X-PAYMENT-RESPONSE": {
+                "description": "Base64 JSON settlement receipt.",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "source",
+                    "snapshot",
+                    "delta",
+                    "retrievedAt"
+                  ],
+                  "properties": {
+                    "source": {
+                      "type": "string",
+                      "enum": [
+                        "ticketmaster",
+                        "fixture"
+                      ]
+                    },
+                    "retrievedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "snapshot": {
+                      "$ref": "#/components/schemas/OnSaleSnapshot"
+                    },
+                    "delta": {
+                      "type": [
+                        "object",
+                        "null"
+                      ],
+                      "description": "Null when no cursor was supplied.",
+                      "properties": {
+                        "unchanged": {
+                          "type": "boolean"
+                        },
+                        "since": {
+                          "type": [
+                            "string",
+                            "null"
+                          ]
+                        },
+                        "changes": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "field": {
+                                "type": "string",
+                                "enum": [
+                                  "state",
+                                  "status",
+                                  "publicSale",
+                                  "presales",
+                                  "priceRanges"
+                                ]
+                              },
+                              "from": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              },
+                              "to": {
+                                "type": [
+                                  "string",
+                                  "null"
+                                ]
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "example": {
+                  "source": "fixture",
+                  "snapshot": {
+                    "eventId": "FIX1RW2TPK1",
+                    "eventName": "Nova Quartet — Seattle",
+                    "state": "not_yet_onsale",
+                    "status": "onsale",
+                    "publicSale": {
+                      "type": "public",
+                      "name": null,
+                      "startDateTime": "2026-10-17T20:00:00.000Z",
+                      "endDateTime": "2026-12-29T20:00:00.000Z"
+                    },
+                    "presales": [
+                      {
+                        "type": "presale",
+                        "name": "Fan Club Presale",
+                        "startDateTime": "2026-10-10T20:00:00.000Z",
+                        "endDateTime": "2026-10-17T20:00:00.000Z"
+                      }
+                    ],
+                    "priceRanges": [
+                      {
+                        "type": "standard",
+                        "currency": "USD",
+                        "min": 45,
+                        "max": 217
+                      }
+                    ],
+                    "url": "https://example.com/event/FIX1RW2TPK1",
+                    "cursor": "eyJzIjoibm90X3lldF9vbnNhbGUiLCJzdCI6Im9uc2Fs…",
+                    "observedAt": "2026-08-07T02:50:56.084Z"
+                  },
+                  "delta": {
+                    "unchanged": true,
+                    "changes": [],
+                    "since": "eyJzIjoibm90X3lldF9vbnNhbGUiLCJzdCI6Im9uc2Fs…"
+                  },
+                  "retrievedAt": "2026-08-07T02:50:56.084Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid parameters.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "Payment required (or payment rejected). The body lists both accepted rails.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaymentRequired"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Upstream data source failed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "operationId": "serviceInfo",
+        "summary": "Service metadata, live prices, and active payment rails (free)",
+        "tags": [
+          "free"
+        ],
+        "responses": {
+          "200": {
+            "description": "Service metadata.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "operationId": "health",
+        "summary": "Liveness probe (free)",
+        "tags": [
+          "free"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string"
+                    },
+                    "uptime": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/.well-known/x402": {
+      "get": {
+        "operationId": "discoveryManifest",
+        "summary": "x402 discovery manifest (free)",
+        "tags": [
+          "free"
+        ],
+        "responses": {
+          "200": {
+            "description": "Manifest.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Event": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "status"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Pass to `/onsale-check/:eventId`."
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Ticket page."
+          },
+          "startLocal": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Local start, `YYYY-MM-DDTHH:MM:SS` in venue time."
+          },
+          "startUtc": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "timezone": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "description": "Upstream lifecycle code: `onsale`, `offsale`, `cancelled`, …"
+          },
+          "segment": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "Top-level classification, e.g. Music, Sports."
+          },
+          "genre": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "venue": {
+            "$ref": "#/components/schemas/Venue"
+          },
+          "priceRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceRange"
+            }
+          },
+          "images": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uri"
+            }
+          }
+        }
+      },
+      "Venue": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "city": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "state": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "country": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "address": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "latitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "longitude": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      },
+      "PriceRange": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "min": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "max": {
+            "type": [
+              "number",
+              "null"
+            ]
+          }
+        }
+      },
+      "SaleWindow": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "public",
+              "presale"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "startDateTime": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "endDateTime": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "OnSaleSnapshot": {
+        "type": "object",
+        "required": [
+          "eventId",
+          "state",
+          "status",
+          "cursor",
+          "observedAt"
+        ],
+        "properties": {
+          "eventId": {
+            "type": "string"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "onsale",
+              "presale",
+              "not_yet_onsale",
+              "offsale",
+              "unknown"
+            ],
+            "description": "Where the event sits in its sales lifecycle right now."
+          },
+          "status": {
+            "type": "string",
+            "description": "Raw upstream status code."
+          },
+          "publicSale": {
+            "$ref": "#/components/schemas/SaleWindow"
+          },
+          "presales": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SaleWindow"
+            }
+          },
+          "priceRanges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PriceRange"
+            }
+          },
+          "url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "Opaque digest of this snapshot. Send it back as `?cursor=` to get a delta."
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "required": [
+          "error"
+        ],
+        "properties": {
+          "error": {
+            "type": "string",
+            "description": "Machine-readable error code."
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable description."
+          }
+        }
+      },
+      "PaymentRequirements": {
+        "type": "object",
+        "description": "One accepted payment rail, per the x402 specification.",
+        "required": [
+          "scheme",
+          "network",
+          "maxAmountRequired",
+          "resource",
+          "payTo",
+          "asset"
+        ],
+        "properties": {
+          "scheme": {
+            "type": "string",
+            "enum": [
+              "exact"
+            ]
+          },
+          "network": {
+            "type": "string",
+            "enum": [
+              "base-sepolia",
+              "base",
+              "solana",
+              "solana-devnet"
+            ],
+            "description": "EVM or Solana network this rail settles on."
+          },
+          "maxAmountRequired": {
+            "type": "string",
+            "description": "Price in USDC base units (6 decimals)."
+          },
+          "resource": {
+            "type": "string",
+            "format": "uri"
+          },
+          "description": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "payTo": {
+            "type": "string",
+            "description": "Receive address (0x… for EVM, base58 for Solana)."
+          },
+          "maxTimeoutSeconds": {
+            "type": "integer"
+          },
+          "asset": {
+            "type": "string",
+            "description": "USDC contract address or SPL mint."
+          },
+          "outputSchema": {
+            "type": "object"
+          },
+          "extra": {
+            "type": "object",
+            "description": "EVM: EIP-712 domain (`name`, `version`). Solana: `feePayer`, the sponsor that pays the SOL network fee."
+          }
+        }
+      },
+      "PaymentRequired": {
+        "type": "object",
+        "required": [
+          "x402Version",
+          "accepts"
+        ],
+        "properties": {
+          "x402Version": {
+            "type": "integer",
+            "enum": [
+              1
+            ]
+          },
+          "error": {
+            "type": "string"
+          },
+          "hint": {
+            "type": "string"
+          },
+          "accepts": {
+            "type": "array",
+            "description": "Both rails: USDC on Base and USDC on Solana.",
+            "items": {
+              "$ref": "#/components/schemas/PaymentRequirements"
+            }
+          }
+        }
+      }
+    }
+  }
+}

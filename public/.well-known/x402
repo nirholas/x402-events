@@ -1,0 +1,504 @@
+{
+  "x402Version": 1,
+  "name": "x402-events",
+  "description": "Event search and on-sale checks over Ticketmaster Discovery — agents find real events and ticket windows",
+  "homepage": "https://nirholas.github.io/x402-events/",
+  "repository": "https://github.com/nirholas/x402-events",
+  "contact": "nichxbt@gmail.com",
+  "skill": "https://github.com/nirholas/x402-events/blob/main/skill.md",
+  "openapi": "https://github.com/nirholas/x402-events/blob/main/openapi.json",
+  "payment": {
+    "note": "Pay in USDC on Base or Solana — your client picks the rail.",
+    "facilitator": "https://x402.org/facilitator",
+    "rails": [
+      {
+        "rail": "evm",
+        "network": "base-sepolia",
+        "asset": "USDC",
+        "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
+        "decimals": 6
+      },
+      {
+        "rail": "solana",
+        "network": "solana",
+        "asset": "USDC",
+        "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
+        "decimals": 6
+      }
+    ]
+  },
+  "resources": [
+    {
+      "resource": "GET /search",
+      "description": "Search real events by keyword, city, country and start date",
+      "price": "$0.003",
+      "network": "base-sepolia",
+      "networks": [
+        "base-sepolia",
+        "solana"
+      ],
+      "asset": "USDC",
+      "accepts": [
+        {
+          "scheme": "exact",
+          "network": "base-sepolia",
+          "asset": "USDC",
+          "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
+          "maxAmountRequired": "3000",
+          "mimeType": "application/json"
+        },
+        {
+          "scheme": "exact",
+          "network": "solana",
+          "asset": "USDC",
+          "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
+          "maxAmountRequired": "3000",
+          "mimeType": "application/json"
+        }
+      ],
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "source",
+          "query",
+          "count",
+          "events",
+          "retrievedAt"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "ticketmaster",
+              "fixture"
+            ]
+          },
+          "query": {
+            "type": "object",
+            "properties": {
+              "keyword": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "city": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "countryCode": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "startDateTime": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "size": {
+                "type": "integer"
+              }
+            }
+          },
+          "count": {
+            "type": "integer"
+          },
+          "retrievedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "name",
+                "status"
+              ],
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Pass to `/onsale-check/:eventId`."
+                },
+                "name": {
+                  "type": "string"
+                },
+                "url": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "uri",
+                  "description": "Ticket page."
+                },
+                "startLocal": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Local start, `YYYY-MM-DDTHH:MM:SS` in venue time."
+                },
+                "startUtc": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "format": "date-time"
+                },
+                "timezone": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "status": {
+                  "type": "string",
+                  "description": "Upstream lifecycle code: `onsale`, `offsale`, `cancelled`, …"
+                },
+                "segment": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "description": "Top-level classification, e.g. Music, Sports."
+                },
+                "genre": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "venue": {
+                  "type": [
+                    "object",
+                    "null"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "city": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "state": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "country": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "address": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "latitude": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "longitude": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    }
+                  }
+                },
+                "priceRanges": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "type": {
+                        "type": "string"
+                      },
+                      "currency": {
+                        "type": "string"
+                      },
+                      "min": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      "max": {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      }
+                    }
+                  }
+                },
+                "images": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "format": "uri"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "resource": "GET /onsale-check/:eventId",
+      "description": "Current on-sale snapshot for one event, plus a delta against your cursor",
+      "price": "$0.002",
+      "network": "base-sepolia",
+      "networks": [
+        "base-sepolia",
+        "solana"
+      ],
+      "asset": "USDC",
+      "accepts": [
+        {
+          "scheme": "exact",
+          "network": "base-sepolia",
+          "asset": "USDC",
+          "payTo": "0x40252CFDF8B20Ed757D61ff157719F33Ec332402",
+          "maxAmountRequired": "2000",
+          "mimeType": "application/json"
+        },
+        {
+          "scheme": "exact",
+          "network": "solana",
+          "asset": "USDC",
+          "payTo": "WwwuGbqHrwF5RG89KhUbmRWEvjnRH9k5kVM5p7T3WwW",
+          "maxAmountRequired": "2000",
+          "mimeType": "application/json"
+        }
+      ],
+      "outputSchema": {
+        "type": "object",
+        "required": [
+          "source",
+          "snapshot",
+          "delta",
+          "retrievedAt"
+        ],
+        "properties": {
+          "source": {
+            "type": "string",
+            "enum": [
+              "ticketmaster",
+              "fixture"
+            ]
+          },
+          "retrievedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "snapshot": {
+            "type": "object",
+            "required": [
+              "eventId",
+              "state",
+              "status",
+              "cursor",
+              "observedAt"
+            ],
+            "properties": {
+              "eventId": {
+                "type": "string"
+              },
+              "eventName": {
+                "type": "string"
+              },
+              "state": {
+                "type": "string",
+                "enum": [
+                  "onsale",
+                  "presale",
+                  "not_yet_onsale",
+                  "offsale",
+                  "unknown"
+                ],
+                "description": "Where the event sits in its sales lifecycle right now."
+              },
+              "status": {
+                "type": "string",
+                "description": "Raw upstream status code."
+              },
+              "publicSale": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "enum": [
+                      "public",
+                      "presale"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "startDateTime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "endDateTime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  }
+                }
+              },
+              "presales": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "enum": [
+                        "public",
+                        "presale"
+                      ]
+                    },
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "startDateTime": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time"
+                    },
+                    "endDateTime": {
+                      "type": [
+                        "string",
+                        "null"
+                      ],
+                      "format": "date-time"
+                    }
+                  }
+                }
+              },
+              "priceRanges": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string"
+                    },
+                    "currency": {
+                      "type": "string"
+                    },
+                    "min": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "max": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              },
+              "url": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "uri"
+              },
+              "cursor": {
+                "type": "string",
+                "description": "Opaque digest of this snapshot. Send it back as `?cursor=` to get a delta."
+              },
+              "observedAt": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          },
+          "delta": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "description": "Null when no cursor was supplied.",
+            "properties": {
+              "unchanged": {
+                "type": "boolean"
+              },
+              "since": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "changes": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "field": {
+                      "type": "string",
+                      "enum": [
+                        "state",
+                        "status",
+                        "publicSale",
+                        "presales",
+                        "priceRanges"
+                      ]
+                    },
+                    "from": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "to": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}
