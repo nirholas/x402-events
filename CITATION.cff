@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: If you use this software, please cite it as below.
+title: "x402-events"
+abstract: "Event search and on-sale checks over Ticketmaster Discovery: agents find real events and ticket windows, paid in USDC on Base or Solana via x402"
+license: Apache-2.0
+repository-code: "https://github.com/nirholas/x402-events"
+url: "https://three.ws"
+authors:
+  - name: three.ws
+    website: "https://three.ws"
