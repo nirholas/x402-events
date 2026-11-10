@@ -1,0 +1,25 @@
+{
+  "name": "x402-events",
+  "owner": {
+    "name": "nirholas"
+  },
+  "description": "Search live events and check on-sale windows over Ticketmaster Discovery, paid per call in USDC via x402.",
+  "plugins": [
+    {
+      "name": "x402-events",
+      "source": "./plugins/x402-events",
+      "description": "Search live events and check on-sale windows over Ticketmaster Discovery, paid per call in USDC via x402.",
+      "category": "data",
+      "tags": [
+        "x402",
+        "usdc",
+        "solana",
+        "base",
+        "agentic-commerce",
+        "http-402",
+        "events",
+        "tickets"
+      ]
+    }
+  ]
+}
